@@ -86,7 +86,7 @@ def flower_battle(color, times, target, place=None):
         ctrl.find_and_click(CRIMSON_FLOWER)
         found = [False]
         while True:
-            ctrl.find_and_click("calyx/" + target, xOffset = 350, thresold=0.9, found=found, try_time_gap=0.33)
+            ctrl.find_and_click("calyx/" + target, xOffset = 350, try_times_limit=2, thresold=0.9, found=found, try_time_gap=0.33)
             if found[0] : break
             ctrl.dragRelPic(CREDIT, yOffset=-250)
             time.sleep(0.5)
