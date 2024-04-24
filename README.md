@@ -8,7 +8,7 @@
 ## 工具：
 
 - 開發語言：Python
-- 依賴庫：pyautogui、pydirectinput、cv2等
+- 依賴庫：pyautogui、pydirectinput、cv2。
 
 在使用本程式之前，請確保已安裝以上依賴庫。
 
