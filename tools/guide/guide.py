@@ -16,28 +16,37 @@ def autobattle(times:int=1, hit=False, repByFuel=False, repByStellar=False):
         pdi.click()
     for _ in range(times-1):
         ctrl.find_and_click(AGAIN, thresold=0.85, try_time_gap=10)
-        if (autoReplenish(repByFuel=repByFuel, repByStellar=repByStellar)) : ctrl.find_and_click(AGAIN, thresold=0.85, try_time_gap=10)
+        exit = [False]
+        if (autoReplenish(repByFuel=repByFuel, repByStellar=repByStellar, exit=exit)) :
+            if not exit[0] : ctrl.find_and_click(AGAIN, thresold=0.85, try_time_gap=10)
+            else :
+                ctrl.find_and_click(CANCEL)
+                break
         time.sleep(1.5)
     time.sleep(2)
-    ctrl.find_and_click(EXIT_BATTLE, try_time_gap=10)
-
+    ctrl.find_and_click(EXIT_BATTLE, try_time_gap=10, thresold=0.85)
+    
 # 自動補充開拓力
-def autoReplenish(repByFuel=False, repByStellar=False):
+def autoReplenish(repByFuel=False, repByStellar=False, exit=None):
     global action_thread_stop
     if action_thread_stop[0] : return
-    if(repByFuel == False and repByStellar == False) : return False
     found = [False]
     ctrl.find_and_click(POWER_REPLENISH, try_times_limit=3, found=found)
+    if found[0] and exit != None : exit[0] = True
+    if(repByFuel == False and repByStellar == False) : return False
+
     if (not found[0]) : return False
     if (repByFuel):
         found = [False]
         ctrl.find_and_click(FUEL, try_times_limit=3, found=found)
         if (not found[0]) :
-            raise Exception("沒有燃料可以使用了!")
+            log_print("已經沒有燃料可以使用了")
+            return False
         ctrl.find_and_click(CONFIRM)
-        time.sleep(0.5)
+        time.sleep(2.5)
         ctrl.find_and_click(CONFIRM)
         ctrl.find_and_click(SPACE_CLOSE)
+        if exit != None : exit[0] = False
         return True
     return False
 
@@ -53,7 +62,7 @@ def claim_daily_reward():
     for _ in range(5):
         if(interrupt[0]):break
         ctrl.find_and_click(CLAIM_DAILY_REWARD, try_times_limit=3, interrupt=interrupt)
-        time.sleep(0.5)
+        time.sleep(1.5)
     
     interrupt = [False]
     ctrl.find_and_click(CLAIM_ALL_DAILY_REWARD, try_times_limit=3, thresold=0.9, interrupt=interrupt)
@@ -62,7 +71,7 @@ def claim_daily_reward():
     ctrl.find_and_click(CLOSE)
 
 # 擬造花萼
-def flower_battle(color, times, target, place=None):
+def flower_battle(color, times, target, place=None, repByFuel=False):
     global action_thread_stop
     if action_thread_stop[0] : return
 
@@ -92,7 +101,7 @@ def flower_battle(color, times, target, place=None):
             time.sleep(0.5)
 
     ctrl.find_and_click(BATTLE_START, xOffset=100, yOffset=-70, humanlike=False)
-    autobattle(times, repByFuel=False)
+    autobattle(times, repByFuel=repByFuel)
 
 # 凝滯虛影
 def stagnant_shadow_battle(image_path, times=1, repByFuel=False):
@@ -196,6 +205,20 @@ def nameless_honor():
     time.sleep(1.5)
     ctrl.find_and_click(FAST_CLAIM, try_times_limit=5, interrupt=interrupt)
     if not interrupt[0] : ctrl.find_and_click(SPACE_CLOSE)
+    ctrl.find_and_click(CLOSE)
+
+# 合成道具
+def synthesize():
+    global action_thread_stop
+    if action_thread_stop[0] : return
+
+    ctrl.find_and_click(PHONE, alt=True, thresold=0.85)
+    ctrl.find_and_click(SYNT_LOGO, thresold=0.75)
+    ctrl.find_and_click(SYNTHESIZE)
+    ctrl.find_and_click(CONFIRM)
+    ctrl.find_and_click(SPACE_CLOSE)
+    ctrl.find_and_click(CLOSE)
+    time.sleep(2.0)
     ctrl.find_and_click(CLOSE)
 
 # 啟動遊戲

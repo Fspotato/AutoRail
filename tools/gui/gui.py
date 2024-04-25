@@ -4,6 +4,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import threading
 import json
+import time
 import os
 
 # region 全域變數
@@ -44,6 +45,10 @@ newplan_button = None
 plan_list = []
 content_plan = None
 
+# check_button
+replenish_check = None
+checkbutton = None
+
 # endregion
 
 # 行動類(用於創建行動隊列)
@@ -58,14 +63,18 @@ class Action:
         self.place = place
 
     def start(self):
+        global replenish_check
+        repByFuel = False
+        if replenish_check.get() == 1: repByFuel = True
         if self.name == ASSIGNMENT_TEXT : guide.assignment()
         elif self.name == DAILY_REWARD_TEXT : guide.claim_daily_reward()
         elif self.name == NAMELESS_HONOR_TEXT : guide.nameless_honor()
-        elif self.name == GOLDEN_FLOWER_TEXT : guide.flower_battle(color=self.name, times=self.times, target=self.target, place=self.place)
-        elif self.name == CRIMSON_FLOWER_TEXT : guide.flower_battle(color=self.name, times=self.times, target=self.target, place=self.place)
-        elif self.name == CAVERN_OF_CORROSION_TEXT : guide.cavern_battle(image_path=self.target, times=self.times)
-        elif self.name == ECHO_OF_WAR_TEXT : guide.echo_battle(image_path=self.target, times=self.times)
-        elif self.name == STAGNANT_SHADOW_TEXT : guide.stagnant_shadow_battle(image_path=self.target, times=self.times)
+        elif self.name == SYNT_TEXT : guide.synthesize()
+        elif self.name == GOLDEN_FLOWER_TEXT : guide.flower_battle(color=self.name, times=self.times, target=self.target, place=self.place, repByFuel=repByFuel)
+        elif self.name == CRIMSON_FLOWER_TEXT : guide.flower_battle(color=self.name, times=self.times, target=self.target, place=self.place, repByFuel=repByFuel)
+        elif self.name == CAVERN_OF_CORROSION_TEXT : guide.cavern_battle(image_path=self.target, times=self.times, repByFuel=repByFuel)
+        elif self.name == ECHO_OF_WAR_TEXT : guide.echo_battle(image_path=self.target, times=self.times, repByFuel=repByFuel)
+        elif self.name == STAGNANT_SHADOW_TEXT : guide.stagnant_shadow_battle(image_path=self.target, times=self.times, repByFuel=repByFuel)
 
     def from_json(obj):
         return Action(obj['name'], obj['times'], obj['target'], obj['place'])
@@ -275,7 +284,7 @@ def draw_action_options(value=None):
         insert_button = tk.Button(root, text="插入隊列", height=1, font=('Arial', 11), command=action_insert)
         insert_button.place(x=210, y=185, width=167)
 
-    elif value == NAMELESS_HONOR_TEXT or value == DAILY_REWARD_TEXT or value == ASSIGNMENT_TEXT :
+    elif value == NAMELESS_HONOR_TEXT or value == DAILY_REWARD_TEXT or value == ASSIGNMENT_TEXT or value == SYNT_TEXT:
 
         # start_button = tk.Button(root, text="直接開始", height=1, font=('Arial', 11), command=action_start)
         # start_button.place(x=210, y=185)
@@ -312,7 +321,7 @@ def draw_action_listbox():
     if content_plan == None : return
 
     for action in content_plan.action_list:
-        if action.name in [NAMELESS_HONOR_TEXT, DAILY_REWARD_TEXT, ASSIGNMENT_TEXT] :
+        if action.name in [NAMELESS_HONOR_TEXT, DAILY_REWARD_TEXT, ASSIGNMENT_TEXT, SYNT_TEXT] :
             action_listbox.insert(tk.END, f'{action.name}')
         elif action.name == GOLDEN_FLOWER_TEXT:
             action_listbox.insert(tk.END, f'{action.name} {action.place} {action.target} {action.times} 次')
@@ -336,7 +345,7 @@ def action_insert():
     if content_plan == None: new_plan()
 
     name = action_box.get()
-    if name == ASSIGNMENT_TEXT or name == DAILY_REWARD_TEXT or name == NAMELESS_HONOR_TEXT:
+    if name == ASSIGNMENT_TEXT or name == DAILY_REWARD_TEXT or name == NAMELESS_HONOR_TEXT or name == SYNT_TEXT:
         content_plan.action_list.append(Action(name=name))
         action_listbox.insert(tk.END, name) 
         Log.print(f'已在 {content_plan.name} 插入 {name}')
@@ -425,6 +434,11 @@ def t_action_list_start():
     interrupt_button.place(x=480, y=355, width=200)
     all_set_disabled()
 
+    for i in range(3, 0, -1):
+        Log.print(f'程序將在 {i} 秒後開始運行，請確保鼠標已放置在遊戲畫面中')
+        time.sleep(1)
+
+    Log.print('開始運行...')
     action_thread_stop[0] = False
     for i in content_plan.action_list:
         if action_thread_stop[0] :
@@ -494,9 +508,11 @@ def plan_load():
 
             if count == action_nums : check = False
         Log.print('方案載入成功!')
-        draw_plan_canvas()
-        if len(plan_list) == 0 : return
+        if len(plan_list) == 0 : 
+            draw_plan_canvas()
+            return
         content_plan = plan_list[0]
+        draw_plan_canvas()
         draw_action_listbox()
         Log.print(f'已設為方案 {content_plan.name}')
 
@@ -517,7 +533,7 @@ def new_plan():
 
 # 取消所有物件交互
 def all_set_disabled():
-    global plan_list, newplan_button, move_up_button, move_down_button, remove_button, action_box
+    global plan_list, newplan_button, move_up_button, move_down_button, remove_button, action_box, checkbutton
     for plan in plan_list:
         plan.set_disabled()
     draw_action_options()
@@ -526,10 +542,11 @@ def all_set_disabled():
     move_down_button.config(state=tk.DISABLED)
     move_up_button.config(state=tk.DISABLED)
     remove_button.config(state=tk.DISABLED)
+    checkbutton.config(state=tk.DISABLED)
 
 # 恢復所有物件交互
 def all_set_enabled():
-    global plan_list, newplan_button, move_up_button, move_down_button, remove_button, action_box
+    global plan_list, newplan_button, move_up_button, move_down_button, remove_button, action_box, checkbutton
     for plan in plan_list:
         plan.set_enabled()
     action_box.config(state=tk.NORMAL)
@@ -537,6 +554,7 @@ def all_set_enabled():
     move_down_button.config(state=tk.NORMAL)
     move_up_button.config(state=tk.NORMAL)
     remove_button.config(state=tk.NORMAL)
+    checkbutton.config(state=tk.NORMAL)
     
 # 凝滯虛影戰鬥
 def stagnant_shadow_battle():
@@ -618,7 +636,7 @@ def t_action_start():
 
 # 主函式
 def main():
-    global root, action_box, action_listbox, plan_canvas, plan_list, content_plan, move_up_button, move_down_button, remove_button, all_start_button, interrupt_button, Log_print
+    global root, action_box, action_listbox, plan_canvas, plan_list, content_plan, move_up_button, move_down_button, remove_button, all_start_button, interrupt_button, Log_print, replenish_check, checkbutton
     root = tk.Tk()
 
     # 主視窗
@@ -648,7 +666,7 @@ def main():
     myLabel.place(x=210, y=5)
     
     # 選項框
-    actions = ["(選擇要進行的事項)", STAGNANT_SHADOW_TEXT, GOLDEN_FLOWER_TEXT, CRIMSON_FLOWER_TEXT, CAVERN_OF_CORROSION_TEXT, ECHO_OF_WAR_TEXT, NAMELESS_HONOR_TEXT, ASSIGNMENT_TEXT, DAILY_REWARD_TEXT]
+    actions = ["(選擇要進行的事項)", STAGNANT_SHADOW_TEXT, GOLDEN_FLOWER_TEXT, CRIMSON_FLOWER_TEXT, CAVERN_OF_CORROSION_TEXT, ECHO_OF_WAR_TEXT, NAMELESS_HONOR_TEXT, ASSIGNMENT_TEXT, DAILY_REWARD_TEXT, SYNT_TEXT]
     action_box = ttk.Combobox(root, values=actions, state='readonly')
     action_box.current(0)
     action_box.bind("<<ComboboxSelected>>", on_action_selected)
@@ -662,6 +680,11 @@ def main():
     listLabelText = tk.StringVar(value="執行隊列")
     listLabel = tk.Label(root, textvariable=listLabelText, height=1, font=('Arial', 12))
     listLabel.place(x=480, y=5)
+
+    # 自動補充開拓力勾選格
+    replenish_check = tk.IntVar()
+    checkbutton = tk.Checkbutton(root, text='自動補充開拓力', variable=replenish_check)
+    checkbutton.place(x=550, y=5)
 
     # 行動隊列滾動條
     scollbar = tk.Scrollbar(root)

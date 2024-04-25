@@ -92,9 +92,12 @@ ASSIGNMENT_AGAIN = "assignment_again.png"
 NAMELESS_HONOR = "nameless_honor.png"
 MISSIONS = "missions.png"
 REWARDS = "rewards.png"
+SYNTHESIZE = "synt.png"
+SYNT_LOGO = "synt_logo.png"
 
 # 通用(路徑)
 BACK_TO_LOGIN = "back_to_login.png"
+CANCEL = "cancel.png"
 CHARACTER_EXP = "character_exp.png"
 CLOSE = "close.png"
 CONFIRM = "confirm.png"
@@ -184,6 +187,7 @@ STAGNANT_SHADOW_TEXT = "凝滯虛影"
 NAMELESS_HONOR_TEXT = "無名勳禮"
 DAILY_REWARD_TEXT = "每日任務"
 ASSIGNMENT_TEXT = "委託任務"
+SYNT_TEXT = "合成任一道具"
 
 # 通用
 CHARACTER_EXP_TEXT = "角色經驗"
@@ -194,3 +198,6 @@ LIGHT_CONE_EXP_TEXT = "光錐經驗"
 action_thread_stop = [False]
 
 Log_print = []
+
+def log_print(value):
+    Log_print[0](value)
