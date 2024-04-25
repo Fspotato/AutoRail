@@ -91,7 +91,7 @@ def flower_battle(color, times, target, place=None):
             ctrl.dragRelPic(CREDIT, yOffset=-250)
             time.sleep(0.5)
 
-    ctrl.find_and_click(BATTLE_START, xOffset=100, yOffset=-70)
+    ctrl.find_and_click(BATTLE_START, xOffset=100, yOffset=-70, humanlike=False)
     autobattle(times, repByFuel=False)
 
 # 凝滯虛影

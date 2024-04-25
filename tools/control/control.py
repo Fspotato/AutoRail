@@ -21,7 +21,7 @@ def match(screenshot, temp):
     return cv2.matchTemplate(screenshot, temp, cv2.TM_CCOEFF_NORMED)
 
 # 查找並點擊
-def find_and_click(image_path, alt=False, xOffset=0, yOffset=0, try_times_limit=-1, thresold=0.8, interrupt=None, found=None, try_time_gap = 1):
+def find_and_click(image_path, alt=False, xOffset=0, yOffset=0, try_times_limit=-1, thresold=0.8, interrupt=None, found=None, try_time_gap = 1, humanlike=True):
     global action_thread_stop, Log_print
     # 加載要查找的圖像
     temp = read_image(image_path)
@@ -48,7 +48,7 @@ def find_and_click(image_path, alt=False, xOffset=0, yOffset=0, try_times_limit=
 
             if(alt): pdi.keyDown("alt")
 
-            pdi.moveTo(x=target_x, y=target_y, duration=rnd.uniform(0.35, 0.75))
+            pdi.moveTo(x=target_x, y=target_y, duration=rnd.uniform(0.35, 0.75), humanlike=humanlike)
 
             pdi.click()
             

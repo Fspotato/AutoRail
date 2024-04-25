@@ -385,7 +385,7 @@ def tripleClick(x=None, y=None, interval=0.0, button=LEFT, duration=0.0, tween=N
 # Use the relative flag to do a raw win32 api relative movement call (no MOUSEEVENTF_ABSOLUTE flag), which may be more 
 # appropriate for some applications. Note that this may produce inexact results depending on mouse movement speed.
 @_genericPyDirectInputChecks
-def moveTo(x=None, y=None, duration=0.0, tween=None, logScreenshot=False, _pause=True, relative=False):
+def moveTo(x=None, y=None, duration=0.0, tween=None, logScreenshot=False, _pause=True, relative=False, humanlike=False):
     if not relative:
         startx, starty = position()
         startx, starty = _to_windows_coordinates(startx, starty)
@@ -405,7 +405,8 @@ def moveTo(x=None, y=None, duration=0.0, tween=None, logScreenshot=False, _pause
                 nums_steps = int(duration / MINIMUM_SLEEP)
                 sleep_amount = duration / nums_steps
 
-            steps = [humanLike_getPointOnLine(startx, starty, x, y, linear(n / nums_steps)) for n in range(nums_steps)]
+            if humanlike : steps = [humanLike_getPointOnLine(startx, starty, x, y, linear(n / nums_steps)) for n in range(nums_steps)]
+            else : steps = [getPointOnLine(startx, starty, x, y, linear(n / nums_steps)) for n in range(nums_steps)]
             steps.append((int(round(x)), int(round(y))))
             
         for tweenX, tweenY in steps:
